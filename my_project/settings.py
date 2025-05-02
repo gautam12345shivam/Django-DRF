@@ -68,7 +68,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),   # Access token expiry
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh token expiry
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=5),   # Refresh token expiry
 }
 
 

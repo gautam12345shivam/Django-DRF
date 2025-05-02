@@ -6,6 +6,7 @@ from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Profile
+from rest_framework.permissions import IsAdminUser
 
 # Register View
 class RegisterView(APIView):
@@ -70,3 +71,37 @@ class UserDetailView(APIView):
             "last_name": user.last_name,
             "image": image_url
         }, status=status.HTTP_200_OK)
+
+#Delete View
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response({'message': 'User Deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+# Update View
+class UserUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+
+            if request.user.id != user.id and not request.user.is_staff:
+                return Response({"error": "You can only update your own profile."}, status=403)
+
+            user.first_name = request.data.get("first_name", user.first_name)
+            user.last_name = request.data.get("last_name", user.last_name)
+            user.username = request.data.get("username", user.username)
+            user.email = request.data.get("email", user.email)
+            user.save()
+
+            return Response({'message': 'User updated successfully.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
